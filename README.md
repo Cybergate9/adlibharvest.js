@@ -1,2 +1,2 @@
 # adlibharvest
-Node based Adlib data harvester (from API) to RethinkDB store
+Node based [Adlib](http://www.adlibsoft.com/) data harvester (from JSON API) to RethinkDB store
