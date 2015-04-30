@@ -1,0 +1,23 @@
+{
+  "name": "adlibharvest",
+  "version": "0.1.0",
+  "description": "harvest from adlib api into rethinkdb store",
+  "main": "adlibharvest.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "rethinkdb",
+    "adlib",
+    "async"
+  ],
+  "author": "Shaun Osborne",
+  "license": "{\"License\" :\"MIT Licence\"}",
+  "dependencies": {
+    "async": "^0.9.0",
+    "commander": "^2.8.1",
+    "moment": "^2.10.2",
+    "request": "^2.55.0",
+    "rethinkdb": "^2.0.0"
+  }
+}
