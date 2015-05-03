@@ -1,8 +1,7 @@
 /* test run May 2015, 200000 full records
-async limit of 5, records per call 50
-about an hour
-*/
-/* adlibharvest.js, Shaun Osborne
+async limit of 5, records per call 50 only took 30 mins..*/
+/* 
+adlibharvest.js, Shaun Osborne, MIT Licence
 https://github.com/ITWrangler/adlibharvest.js
 */
 var request = require('request');
