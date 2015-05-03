@@ -1,5 +1,6 @@
 # adlibharvest.js
-Node based [Adlib](http://www.adlibsoft.com/) data harvester (from JSON API) to RethinkDB store
+Node.js based [Adlib](http://www.adlibsoft.com/) data harvester (from JSON API) to RethinkDB store.
+Runs async so is reasonably quick, currently async is limited to 5 simultaneous calls.
 
 It doesn't create RethinkDB database or table, so create objects->adlib on local RethinkDB
 
