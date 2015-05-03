@@ -21,7 +21,7 @@ program.version('0.9.5')
 .parse(process.argv);
 
 
-
+/* these need to be changed to your api end point and database values */
 var api = "http://data.fitzmuseum.cam.ac.uk/adlibapi/wwwopac.ashx?output=json"
 var params  ="&database=objects.uf&xmltype=grouped"
 //var search  = "search=priref>0 AND modification>'2014-09-01'"
