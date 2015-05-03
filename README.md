@@ -1,5 +1,3 @@
-tag: value
-
 # adlibharvest.js
 Node.js based [Adlib](http://www.adlibsoft.com/) data harvester (from JSON API) ingesting to [RethinkDB](http://rethinkdb.com/) store.
 Runs async so is reasonably quick, currently async is configured to limit to 5 simultaneous calls.
