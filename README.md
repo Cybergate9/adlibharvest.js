@@ -5,7 +5,7 @@ Can be modified to make any valid adlib api call obviously, but given my intent 
 
 It doesn't create RethinkDB database or table, so create objects->adlib, the target, on local RethinkDB.
 
-Error checking is bit sparse but functional, I haven't yet moved to running this automaticall, but its getting close.
+Error checking is bit sparse but functional, I haven't yet moved to running this automatically, but it's getting close.
 
 
 Usage is output thru node adlibharvest.js -h
