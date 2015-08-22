@@ -1,6 +1,6 @@
 /* test run May 2015, 200000 full records
 async limit of 5, records per call 50 only took 30 mins..*/
-/* 
+/*
 adlibharvest.js, Shaun Osborne, MIT Licence
 https://github.com/ITWrangler/adlibharvest.js
 */
@@ -16,14 +16,14 @@ program.version('0.9.5')
 .option('-r --requests [number]', 'Number of requests [10]',10)
 .option('-l --limit [number]', 'limit value passed to api as limit=[50]',50)
 .option('-t --transform [yes|no]', 'Transform field names to remove dot notation [yes]','yes')
+.option('-c --connections [number]','number of async connections to allow', 3)
 .option('-q --quiet', 'do not output progress messages')
 .parse(process.argv);
 
 
-/* these need to be changed to your api end point and database values */
+/* golbals - these need to be changed to your api end point and database values */
 var api = "http://data.fitzmuseum.cam.ac.uk/adlibapi/wwwopac.ashx?output=json"
 var params  ="&database=objects.uf&xmltype=grouped"
-//var search  = "search=priref>0 AND modification>'2014-09-01'"
 var search  = "search=priref>0"
 if(program.from){
 	var search = search+" AND modification>'"+program.from+"'";
@@ -37,7 +37,7 @@ var x = 0;
 
 
 if(!program.quiet){
-	console.log(search, limit, requests, startfrom);
+	console.log(search, program.connections, limit, requests, startfrom);
 }
 
 var urllist = new Array();
@@ -50,8 +50,12 @@ for(var i=0 ; i <= requests; i++)
 }
 
 
-async.eachLimit(urllist, 5, getURL, function(err, result){
-	if(err){
+async.eachLimit(urllist, program.connections, getURL, function(err, result){
+	if(err === "hits0"){
+				console.log("Finishing with hits = 0...");
+				return; /* fall out when we're done */
+	}
+	else if(err) {
 		console.log("ERROR: ", err);
 		throw err
 	}
@@ -67,14 +71,14 @@ function getURL(callurl, callback){
     	timeout: 90000,
     };
     options.url = callurl;
-	request(options,function(err, resp, body){	
+	request(options,function(err, resp, body){
 		if(err ) {
-		  callback(err);  
+		  callback(err);
 		}
 		else
 		{
 			if(!body || body[0] === '<'){
-				callback("no body: " + body + "\n" + options.url); // util.inspect(resp));
+				callback("unrecognised/no returned JSON body: " + body + "\n" + options.url); // util.inspect(resp));
 			}
 			bodyxform=fixAdlibFieldNames(body,program.transform); // if asked to transform field name in adlib data
 			//console.log(bodyxform);
@@ -83,8 +87,8 @@ function getURL(callurl, callback){
 			if(adlibResponse.adlibJSON.diagnostic.hits_on_display === "0"){
 				var zh = "Hits:0 at ["+options.url+"]";
 				console.log(zh);
-				callback(null,zh);
-				//++" hits: "+adlibResponse.adlibJSON.diagnostic.hits_on_display);
+				callback("hits0");
+
 			}
 			else {
 	      		for(var index in adlibResponse.adlibJSON.recordList.record){
@@ -95,7 +99,7 @@ function getURL(callurl, callback){
 	      	writeRecord(adlibResponse.adlibJSON.recordList.record,options.url,callback);
 	      }
 		}
-	 });	
+	 });
 };
 
 function writeRecord (ADLIBjson, url, callback){
@@ -106,7 +110,7 @@ function writeRecord (ADLIBjson, url, callback){
 			r.db('objects').table('adlib').insert(ADLIBjson,{conflict: "replace"}).run(conn,
 				function(err,result){
 					if(err) {
-						callback('RDB: '+err);					
+						callback('RDB: '+err);
 					}
 					conn.close();
 					if(!program.quiet){console.log(moment().format(), ADLIBjson.length, JSON.stringify(result), url);}
@@ -118,17 +122,18 @@ function writeRecord (ADLIBjson, url, callback){
 };
 
 function fixAdlibFieldNames (body, transform) {
+	/* this is a bit ugly but it works... */
 	var bodyxform = body; // initial bodyxform is just plain
 	if(transform === 'yes'){
 	   var regex = /(\")[a-z1-9]+\.([a-z1-9_\.]+\"\:)/g;
 	   bodyxform = bodyxform.replace(regex,"$1$2"); // remove 'dot notation' from *first* part of all field names
-	   var regex = /(\"[a-z1-9_]+)\.([a-z1-9_\.]+\"\:)/g; 
+	   var regex = /(\"[a-z1-9_]+)\.([a-z1-9_\.]+\"\:)/g;
 	   bodyxform = bodyxform.replace(regex,"$1_$2"); // replace any remaining fields with 'dot notation' with '_''s
-	   var regex = /(\"[a-z1-9_]+)\.([a-z1-9_\.]+\"\:)/g; 
+	   var regex = /(\"[a-z1-9_]+)\.([a-z1-9_\.]+\"\:)/g;
 	   bodyxform = bodyxform.replace(regex,"$1_$2"); // replace any remaining fields with 'dot notation' with '_''s
-	   var regex = /(\"\@attributes\"\:)/g; 
+	   var regex = /(\"\@attributes\"\:)/g;
 	   bodyxform = bodyxform.replace(regex,'"attributes":'); // replace @attributes field
-	    
+
 	}
 	return bodyxform;
 };
